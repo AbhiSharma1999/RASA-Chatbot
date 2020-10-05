@@ -1,7 +1,9 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:http/http.dart' as http;
+import 'package:rasa_chatbot/locale/DemoLocalization.dart';
 import 'package:rasa_chatbot/models/message_model.dart';
 import 'package:rasa_chatbot/models/reply_model.dart';
 import 'package:rasa_chatbot/models/sent_model.dart';
@@ -14,7 +16,10 @@ class ChatPage extends StatefulWidget {
 
 class _ChatPageState extends State<ChatPage> {
 
-  List<Message> messages = [Message(text: "Hey there! How may I help you :)", time: "123", isMe: false)];
+  List<Message> messages =[ Message(text: "Hey there! How may I help you :)", time: "123", isMe: false)] ;
+
+ 
+
   final controller = TextEditingController();
 
   _networkReply(String message,String sender,String time) async{
@@ -30,6 +35,7 @@ class _ChatPageState extends State<ChatPage> {
         var parsedResponse = ReplyArray.fromJson(jsonResponse);
         var list = parsedResponse.replies;
         setState(() {
+          messages.removeLast();
           messages.add(Message(text: list[0].text, time: time,isMe: false));
         });
       }
@@ -84,58 +90,12 @@ class _ChatPageState extends State<ChatPage> {
     
     return msg;
   }
-
-  // _buildMessageComposer() {
-  //   return Container(
-  //     padding: EdgeInsets.symmetric(horizontal: 8.0),
-  //     height: 70.0,
-  //     color: Colors.white,
-  //     child: Row(
-  //       children: <Widget>[
-  //         Expanded(
-  //           child: TextField(
-  //             controller: controller,
-  //             onSubmitted: (text) {
-  //             messages.add(Message(text: text, time: "123", isMe: true));
-  //             controller.clear();
-  //             _networkReply(text, "", "Time");
-  //             setState(() {});
-  //           },
-  //             textCapitalization: TextCapitalization.sentences,
-  //             decoration: InputDecoration.collapsed(
-  //               hintText: 'Send a message...',
-  //             ),
-  //           ),
-  //         ),
-  //         IconButton(
-  //           icon: Icon(Icons.send),
-  //           iconSize: 25.0,
-  //           color: Theme.of(context).primaryColor,
-  //           onPressed: () {
-  //             messages.add(Message(
-  //               text: controller.text,
-  //               time: "Time",
-  //               isMe: true
-  //               ));
-  //               _networkReply(controller.text, "", "Time");
-  //             setState(() {
-                
-  //             });
-            
-  //           }
-  //         ),
-  //       ],
-  //     ),
-  //   );
-  // } 
-
-
   
-
-
-
   @override
   Widget build(BuildContext context) {
+
+    
+
       return Scaffold(
       backgroundColor: Color(0xff1d2d50),
       appBar: AppBar(
@@ -183,6 +143,9 @@ class _ChatPageState extends State<ChatPage> {
                     itemBuilder: (BuildContext context, int index) {
                       Message message = messages[index];
                       bool isMe = message.isMe;
+                      if(message.text=="loading") return  SpinKitWave(color: Color(0xffF5F7DC), type: SpinKitWaveType.start,size: 25.0,);
+                        
+                      else
                       return _buildMessage(message, isMe);
                     },
                   ),
@@ -202,6 +165,7 @@ class _ChatPageState extends State<ChatPage> {
               controller: controller,
               onSubmitted: (text) {
               messages.add(Message(text: text, time: "123", isMe: true));
+              messages.add(Message(text: "loading", time: "123", isMe: true));
               controller.clear();
               _networkReply(text, "", "Time");
               setState(() {});
@@ -223,6 +187,7 @@ class _ChatPageState extends State<ChatPage> {
                 time: "Time",
                 isMe: true
                 ));
+                messages.add(Message(text: "loading", time: "123", isMe: true));
                 _networkReply(controller.text, "", "Time");
                 controller.clear();
               setState(() {
