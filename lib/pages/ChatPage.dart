@@ -3,22 +3,33 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:http/http.dart' as http;
-import 'package:rasa_chatbot/locale/DemoLocalization.dart';
 import 'package:rasa_chatbot/models/message_model.dart';
 import 'package:rasa_chatbot/models/reply_model.dart';
 import 'package:rasa_chatbot/models/sent_model.dart';
 
 
 class ChatPage extends StatefulWidget {
+  final Locale locale;
+
+  ChatPage({@required this.locale});
   @override
   _ChatPageState createState() => _ChatPageState();
 }
 
 class _ChatPageState extends State<ChatPage> {
 
-  List<Message> messages =[ Message(text: "Hey there! How may I help you :)", time: "123", isMe: false)] ;
+  List<Message> messages ;
+  String url;
 
- 
+  @override
+  void initState() { 
+    url = widget.locale.languageCode.toString()=="en"?"https://2fcdf7ceaf31.ngrok.io/webhooks/rest/webhook":"https://b71b8d7c25ee.ngrok.io/webhooks/rest/webhook";
+    var mess = widget.locale.languageCode.toString()=="en"?"Hey! How may I assist you?":"नमस्ते! मैं आपकी कैसे सहायता कर सकता हूँ?";
+    messages =[ Message(text: mess, time: "123", isMe: false)] ;
+    super.initState();
+    
+    
+  }
 
   final controller = TextEditingController();
 
@@ -27,7 +38,7 @@ class _ChatPageState extends State<ChatPage> {
       var _jsonMessage = jsonEncode(sentMessage);
       print(_jsonMessage);
       var jsonResponse;
-      var response =await http.post("http://6fdd7fc5c334.ngrok.io/webhooks/rest/webhook",body: _jsonMessage);
+      var response =await http.post(url,body: _jsonMessage);
       var statusCode = response.statusCode;
       print(statusCode);
       if(statusCode==200){

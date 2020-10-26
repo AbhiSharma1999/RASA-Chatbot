@@ -73,7 +73,7 @@ class _MyAppState extends State<MyApp> {
       //   return supportedLocales.last;
       // },
       debugShowCheckedModeBanner: false,
-      home: Home(),
+      home: Home(locale: _locale,),
     );
   }
 }

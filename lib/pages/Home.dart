@@ -2,16 +2,23 @@ import 'package:clay_containers/clay_containers.dart';
 import 'package:flutter/material.dart';
 import 'package:rasa_chatbot/Routeanimations/routetransition.dart';
 import 'package:rasa_chatbot/locale/DemoLocalization.dart';
+import 'package:rasa_chatbot/locale/constants.dart';
 import 'package:rasa_chatbot/pages/ChatPage.dart';
 
 import 'Settings.dart';
 class Home extends StatefulWidget {
+
+  final Locale locale;
+
+  Home({@required this.locale});
 
   @override
   _HomeState createState() => _HomeState();
 }
 
 class _HomeState extends State<Home> {
+
+  
 
   @override
   Widget build(BuildContext context) {
@@ -41,7 +48,8 @@ class _HomeState extends State<Home> {
                    padding: const EdgeInsets.only(left:20.0,right: 20),
                    child: GestureDetector(
                        onTap: (){
-                         Navigator.push(context, RotationRoute(page: ChatPage()));
+                         print("getLocale"+widget.locale.languageCode);
+                         Navigator.push(context, RotationRoute(page: ChatPage(locale:widget.locale)));
                        },
                        child: ClayContainer(
                        depth: 10,
