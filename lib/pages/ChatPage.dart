@@ -6,6 +6,9 @@ import 'package:http/http.dart' as http;
 import 'package:rasa_chatbot/models/message_model.dart';
 import 'package:rasa_chatbot/models/reply_model.dart';
 import 'package:rasa_chatbot/models/sent_model.dart';
+import 'package:speech_to_text/speech_to_text.dart' as stt;
+
+
 
 
 class ChatPage extends StatefulWidget {
@@ -20,16 +23,62 @@ class _ChatPageState extends State<ChatPage> {
 
   List<Message> messages ;
   String url;
+  Locale locale;
+
+  stt.SpeechToText _speech;
+  bool _isListening = false;
+  var locales;
+  String _text = 'Press the button and start speaking';
+  double _confidence = 1.0;
+
 
   @override
   void initState() { 
-    url = widget.locale.languageCode.toString()=="en"?"https://2fcdf7ceaf31.ngrok.io/webhooks/rest/webhook":"https://b71b8d7c25ee.ngrok.io/webhooks/rest/webhook";
+    locale = widget.locale;
+    url = widget.locale.languageCode.toString()=="en"?"https://46ba65d2d709.ngrok.io/webhooks/rest/webhook":"https://3b144419fd09.ngrok.io/webhooks/rest/webhook";
     var mess = widget.locale.languageCode.toString()=="en"?"Hey! How may I assist you?":"नमस्ते! मैं आपकी कैसे सहायता कर सकता हूँ?";
     messages =[ Message(text: mess, time: "123", isMe: false)] ;
+    _speech = stt.SpeechToText();
     super.initState();
     
     
   }
+
+
+
+  void _listen() async {
+    if (!_isListening) {
+      bool available = await _speech.initialize(
+        onStatus: (val) => print('onStatus: $val'),
+        onError: (val) => print('onError: $val'),
+      );
+      if (available) {
+        setState(() => _isListening = true);
+        _speech.listen(
+          localeId: locale.languageCode,
+          onResult: (val) => setState(() {
+            _text = val.recognizedWords;
+            if (val.hasConfidenceRating && val.confidence > 0) {
+              _confidence = val.confidence;
+            }
+          }),
+        );
+      }
+    } else {
+
+      messages.add(Message(
+        text: _text,
+        time: "Time",
+        isMe: true
+        ));
+       messages.add(Message(text: "loading", time: "123", isMe: true));
+      _networkReply(_text, "", "Time");
+      _speech.stop();
+      setState(() { _isListening = false;_text = 'Press the button and start speaking';});
+      
+    }
+  }
+
 
   final controller = TextEditingController();
 
@@ -163,6 +212,8 @@ class _ChatPageState extends State<ChatPage> {
                 ),
               ),
             ),
+            Text(_text,
+            style: TextStyle(color: Color(0xffF5F7DC),)),
             // _buildMessageComposer()
             Container(
       padding: EdgeInsets.symmetric(horizontal: 8.0),
@@ -187,6 +238,12 @@ class _ChatPageState extends State<ChatPage> {
                 hintStyle: TextStyle(color: Color(0xff1e5f74),)
               ),
             ),
+          ),
+          IconButton(
+            icon: _isListening? Icon(Icons.stop):Icon(Icons.mic),
+            iconSize: 25.0,
+            color:_isListening?Colors.red: Color(0xffF5F7DC) ,
+            onPressed:_listen
           ),
           IconButton(
             icon: Icon(Icons.send),
