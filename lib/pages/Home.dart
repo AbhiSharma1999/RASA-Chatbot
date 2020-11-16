@@ -74,7 +74,8 @@ class _HomeState extends State<Home> {
                  Padding(
                    padding: const EdgeInsets.only(bottom:18.0),
                    child: IconButton(icon: Center(child: Icon(Icons.settings,size: 45,color:Color(0xffffd700))), 
-                   onPressed: (){Navigator.push(context, SlideUpRoute(page: Settings()));},
+                  //  onPressed: (){Navigator.push(context, SlideUpRoute(page: Settings()));},
+                  onPressed: null,
                    )
                  ),
 

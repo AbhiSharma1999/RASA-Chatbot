@@ -35,7 +35,7 @@ class _ChatPageState extends State<ChatPage> {
   @override
   void initState() { 
     locale = widget.locale;
-    url = widget.locale.languageCode.toString()=="en"?"https://46ba65d2d709.ngrok.io/webhooks/rest/webhook":"https://3b144419fd09.ngrok.io/webhooks/rest/webhook";
+    url = widget.locale.languageCode.toString()=="en"?"https://2493511fed6e.ngrok.io/rasa/rasareq":"https://2493511fed6e.ngrok.io/rasa/rasareq";
     var mess = widget.locale.languageCode.toString()=="en"?"Hey! How may I assist you?":"नमस्ते! मैं आपकी कैसे सहायता कर सकता हूँ?";
     messages =[ Message(text: mess, time: "123", isMe: false)] ;
     _speech = stt.SpeechToText();
@@ -46,7 +46,7 @@ class _ChatPageState extends State<ChatPage> {
 
 
 
-  void _listen() async {
+  void _listen(String lang) async {
     if (!_isListening) {
       bool available = await _speech.initialize(
         onStatus: (val) => print('onStatus: $val'),
@@ -55,7 +55,7 @@ class _ChatPageState extends State<ChatPage> {
       if (available) {
         setState(() => _isListening = true);
         _speech.listen(
-          localeId: locale.languageCode,
+          localeId: lang,
           onResult: (val) => setState(() {
             _text = val.recognizedWords;
             if (val.hasConfidenceRating && val.confidence > 0) {
@@ -64,7 +64,7 @@ class _ChatPageState extends State<ChatPage> {
           }),
         );
       }
-    } else {
+    } else if(_text!='Press the button and start speaking') {
 
       messages.add(Message(
         text: _text,
@@ -85,9 +85,12 @@ class _ChatPageState extends State<ChatPage> {
   _networkReply(String message,String sender,String time) async{
       Sent sentMessage = Sent(sender,message);
       var _jsonMessage = jsonEncode(sentMessage);
+       Map<String, String> requestHeaders = {
+       'Content-type': 'application/json'
+     };
       print(_jsonMessage);
       var jsonResponse;
-      var response =await http.post(url,body: _jsonMessage);
+      var response =await http.post(url,body: _jsonMessage,headers: requestHeaders);
       var statusCode = response.statusCode;
       print(statusCode);
       if(statusCode==200){
@@ -212,9 +215,29 @@ class _ChatPageState extends State<ChatPage> {
                 ),
               ),
             ),
-            Text(_text,
+             Text(_text,
             style: TextStyle(color: Color(0xffF5F7DC),)),
-            // _buildMessageComposer()
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                RaisedButton.icon(
+                  icon: _isListening? CircularProgressIndicator(strokeWidth: 2,):Icon(Icons.mic),
+                  label: Text(
+                    _isListening? "Stop":"Speak in English"
+                  ),
+                  onPressed: ()=>_listen("en"),
+                ),
+                RaisedButton.icon(
+                  icon: _isListening? CircularProgressIndicator(strokeWidth:2):Icon(Icons.mic),
+                  label: Text(
+                    _isListening? "रुकें":"हिंदी मे बोलो"
+                  ),
+                  onPressed: (){_listen("hi");},
+                )
+              ],
+            ),
+           
             Container(
       padding: EdgeInsets.symmetric(horizontal: 8.0),
       height: 90.0,
@@ -239,12 +262,12 @@ class _ChatPageState extends State<ChatPage> {
               ),
             ),
           ),
-          IconButton(
-            icon: _isListening? Icon(Icons.stop):Icon(Icons.mic),
-            iconSize: 25.0,
-            color:_isListening?Colors.red: Color(0xffF5F7DC) ,
-            onPressed:_listen
-          ),
+          // IconButton(
+          //   icon: _isListening? Icon(Icons.stop):Icon(Icons.mic),
+          //   iconSize: 25.0,
+          //   color:_isListening?Colors.red: Color(0xffF5F7DC) ,
+          //   onPressed:()=>_listen(1)
+          // ),
           IconButton(
             icon: Icon(Icons.send),
             iconSize: 25.0,
